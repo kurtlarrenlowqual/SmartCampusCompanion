@@ -37,12 +37,15 @@ fun LoginScreen(navController: NavController, context: Context) {
             onClick = {
                 if (username == "student" && password == "1234") {
                     SessionManager.saveLogin(context, username)
-                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show() //Show toast for successful login
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
+                } else if (username == "" || password == "") {
+                        Toast.makeText(context, "Field/s cannot be blank!", Toast.LENGTH_SHORT).show()  // Show toast when fields are blank
                 } else {
-                    Toast.makeText(context, "Login Failed", Toast.LENGTH_SHORT).show()                }
+                    Toast.makeText(context, "Login Failed due to invalid credentials", Toast.LENGTH_SHORT).show()  //toast for login failed due to invalid credentials
+                }
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {
