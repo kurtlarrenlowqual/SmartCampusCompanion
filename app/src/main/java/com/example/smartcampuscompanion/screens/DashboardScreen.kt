@@ -55,14 +55,30 @@ fun DashboardScreen(navController: NavController, context: Context) {
             ) {
                 // Drawer content
                 Column(modifier = Modifier.padding(16.dp)) {
+                    // Added a dashboard button in drawer
+                    Spacer(modifier = Modifier.height(70.dp))
+                    Text(
+                        text = "Dashboard",
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                // Clickable text
+                                navController.navigate("dashboard") {
+                                }
+                                // Close the drawer
+                                scope.launch { drawerState.close() }
+                            }
+                    )
+                    // Edited the campus info button in drawer
                     Text(
                         text = "Campus Information",
                         modifier = Modifier
                             .padding(8.dp)
                             .clickable {
                                 // Clickable text
-                                navController.navigate("dashboard") {
-
+                                navController.navigate("campus") {
+                                    // Will close the dashboard screen
+                                    popUpTo("dashboard") { inclusive = true }
                                 }
                                 // Close the drawer
                                 scope.launch { drawerState.close() }
