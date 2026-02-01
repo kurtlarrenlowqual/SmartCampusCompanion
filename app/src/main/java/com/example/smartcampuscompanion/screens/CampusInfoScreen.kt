@@ -125,7 +125,12 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
             content = { paddingValues ->
                 // Campus info content
                 val departments = listOf(
-                    "Sample - sample text"
+                    "College of Computing Studies - collegeofcomstudies@email.com",
+                    "College of Arts and Sciences - collegeofartsandsciences@email.com",
+                    "College of Business Administration and Accountancy - collegeofbaa@email.com",
+                    "College of Health and Allied Sciences - collegeof_has@email.com",
+                    "College of Education - coed.pnc@email.com",
+                    "College of Engineering - collegeofengr@email.com"
                 )
 
                 LazyColumn(modifier = Modifier
