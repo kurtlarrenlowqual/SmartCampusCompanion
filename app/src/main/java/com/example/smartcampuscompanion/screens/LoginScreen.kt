@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import android.content.Context
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -19,15 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.smartcampuscompanion.util.SessionManager
-import android.widget.Toast
-
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 @Composable
 fun LoginScreen(navController: NavController, context: Context) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // State to control the popup dialog
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
         TextField(value = username, onValueChange = { username = it }, label = { Text("Username") })
@@ -37,19 +45,49 @@ fun LoginScreen(navController: NavController, context: Context) {
             onClick = {
                 if (username == "student" && password == "1234") {
                     SessionManager.saveLogin(context, username)
-                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show() //Show toast for successful login
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                } else if (username == "" || password == "") {
-                        Toast.makeText(context, "Field/s cannot be blank!", Toast.LENGTH_SHORT).show()  // Show toast when fields are blank
+                    // Dialog window for successful login instead of toast
+                    dialogMessage = "Login Successful! Welcome, $username :)"
+                    showDialog = true
+                    //  Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                    // Removed the navigation code here so that the alert dialog will not automatically close
+                    // Dialog window for failed logins instead of toast
+                } else if (username == "" || password == ""){
+                    dialogMessage = "Field/s cannot be blank! Please try again :("
+                    showDialog = true
+                    // Toast.makeText(context, "Field/s cannot be blank!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Login Failed due to invalid credentials", Toast.LENGTH_SHORT).show()  //toast for login failed due to invalid credentials
+                    dialogMessage = "Invalid login credentials! Please try again :("
+                    showDialog = true
+                    // Toast.makeText(context, "Login failed due to invalid credentials", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("Login")
         }
+    }
+
+    // Popup Dialog
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Login Status") },
+            text = { Text(dialogMessage) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        // Navigate to dashboard if login is successful
+                        if (dialogMessage == "Login Successful! Welcome, $username :)") {
+                            navController.navigate("dashboard") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
