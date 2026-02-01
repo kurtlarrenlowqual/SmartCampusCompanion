@@ -48,17 +48,14 @@ fun LoginScreen(navController: NavController, context: Context) {
                     // Dialog window for successful login instead of toast
                     dialogMessage = "Login Successful! Welcome, $username :)"
                     showDialog = true
-                    //  Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                     // Removed the navigation code here so that the alert dialog will not automatically close
                     // Dialog window for failed logins instead of toast
                 } else if (username == "" || password == ""){
                     dialogMessage = "Field/s cannot be blank! Please try again :("
                     showDialog = true
-                    // Toast.makeText(context, "Field/s cannot be blank!", Toast.LENGTH_SHORT).show()
                 } else {
                     dialogMessage = "Invalid login credentials! Please try again :("
                     showDialog = true
-                    // Toast.makeText(context, "Login failed due to invalid credentials", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.padding(top = 16.dp)
