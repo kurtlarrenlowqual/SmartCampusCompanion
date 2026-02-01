@@ -91,6 +91,8 @@ fun DashboardScreen(navController: NavController, context: Context) {
                             .clickable {
                                 // Logout functionality
                                 navController.navigate("login") {
+                                    // Ensures user is logout even after exiting the app
+                                    SessionManager.logout(context)
                                     popUpTo("dashboard") { inclusive = true }
                                 }
                                 // Close the drawer
