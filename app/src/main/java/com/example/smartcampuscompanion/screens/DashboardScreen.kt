@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 
 
 
@@ -56,11 +57,29 @@ fun DashboardScreen(navController: NavController, context: Context) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Campus Information",
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                // Clickable text
+                                navController.navigate("dashboard") {
+
+                                }
+                                // Close the drawer
+                                scope.launch { drawerState.close() }
+                            }
                     )
                     Text(
                         text = "Logout",
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                // Clickable text
+                                navController.navigate("dashboard") {
+
+                                }
+                                // Close the drawer
+                                scope.launch { drawerState.close() }
+                            }
                     )
                 }
             }
