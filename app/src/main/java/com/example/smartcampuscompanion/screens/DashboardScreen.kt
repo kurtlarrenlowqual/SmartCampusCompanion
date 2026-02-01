@@ -64,6 +64,8 @@ fun DashboardScreen(navController: NavController, context: Context) {
                             .clickable {
                                 // Clickable text
                                 navController.navigate("dashboard") {
+                                    // Prevents multiple instances of dashboard
+                                    popUpTo("dashboard") { inclusive = true }
                                 }
                                 // Close the drawer
                                 scope.launch { drawerState.close() }
@@ -77,8 +79,7 @@ fun DashboardScreen(navController: NavController, context: Context) {
                             .clickable {
                                 // Clickable text
                                 navController.navigate("campus") {
-                                    // Will close the dashboard screen
-                                    popUpTo("dashboard") { inclusive = true }
+                                    // Removed popupto so we can go back to dashboard
                                 }
                                 // Close the drawer
                                 scope.launch { drawerState.close() }
