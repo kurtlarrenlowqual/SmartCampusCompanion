@@ -29,7 +29,7 @@ fun AppNavGraph(
 
         // include campus info screen in navigation
         composable("campus") {
-            CampusInfoScreen()
+            CampusInfoScreen(navController, LocalContext.current)
         }
     }
 }
