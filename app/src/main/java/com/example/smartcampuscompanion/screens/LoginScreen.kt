@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.smartcampuscompanion.util.SessionManager
+import android.widget.Toast
 
 @Composable
 fun LoginScreen(navController: NavController, context: Context) {
@@ -36,6 +37,7 @@ fun LoginScreen(navController: NavController, context: Context) {
             onClick = {
                 if (username == "student" && password == "1234") {
                     SessionManager.saveLogin(context, username)
+                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
