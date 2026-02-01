@@ -41,7 +41,8 @@ fun LoginScreen(navController: NavController, context: Context) {
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
-                }
+                } else {
+                    Toast.makeText(context, "Login Failed", Toast.LENGTH_SHORT).show()                }
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {
