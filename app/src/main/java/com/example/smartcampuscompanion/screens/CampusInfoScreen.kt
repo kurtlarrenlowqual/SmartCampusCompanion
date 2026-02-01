@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -125,24 +126,39 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
             content = { paddingValues ->
                 // Campus info content
                 val departments = listOf(
-                    "College of Computing Studies - collegeofcomstudies@email.com",
-                    "College of Arts and Sciences - collegeofartsandsciences@email.com",
-                    "College of Business Administration and Accountancy - collegeofbaa@email.com",
-                    "College of Health and Allied Sciences - collegeof_has@email.com",
-                    "College of Education - coed.pnc@email.com",
-                    "College of Engineering - collegeofengr@email.com"
+                    "College of Computing Studies" to "collegeofcomstudies@email.com",
+                    "College of Arts and Sciences" to "collegeofartsandsciences@email.com",
+                    "College of Business Administration and Accountancy" to "collegeofbaa@email.com",
+                    "College of Health and Allied Sciences" to "collegeof_has@email.com",
+                    "College of Education" to "coed.pnc@email.com",
+                    "College of Engineering" to "collegeofengr@email.com"
                 )
 
-                LazyColumn(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
                 ) {
-                    items(departments) { dept ->
-                        Card(modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)) {
-                            Text(dept, modifier = Modifier.padding(16.dp))
+                    items(departments) { (name, email) ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = email,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }
