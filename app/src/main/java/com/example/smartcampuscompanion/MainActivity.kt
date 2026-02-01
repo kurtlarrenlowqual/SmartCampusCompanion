@@ -26,8 +26,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier,
                     color = Color.White
                 ) {
+                    //user stays logged in
                     val navController = rememberNavController()
-                    val startDestination = "login"
+                    val context = LocalContext.current
+
+                    val startDestination =
+                        if (SessionManager.isLoggedIn(context)) "dashboard" else "login"
 
                     AppNavGraph(navController, startDestination)
                 }
