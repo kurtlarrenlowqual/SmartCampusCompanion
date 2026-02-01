@@ -73,9 +73,9 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         modifier = Modifier
                             .padding(8.dp)
                             .clickable {
-                                // Clickable text
-                                navController.navigate("dashboard") {
-
+                                // Logout functionality
+                                navController.navigate("login") {
+                                    popUpTo("dashboard") { inclusive = true }
                                 }
                                 // Close the drawer
                                 scope.launch { drawerState.close() }
