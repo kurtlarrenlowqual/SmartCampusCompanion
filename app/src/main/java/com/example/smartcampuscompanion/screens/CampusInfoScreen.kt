@@ -124,7 +124,23 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
             },
             content = { paddingValues ->
                 // Campus info content
+                val departments = listOf(
+                    "Sample - sample text"
+                )
 
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                ) {
+                    items(departments) { dept ->
+                        Card(modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)) {
+                            Text(dept, modifier = Modifier.padding(16.dp))
+                        }
+                    }
+                }
             }
         )
     }
