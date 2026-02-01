@@ -34,7 +34,12 @@ fun LoginScreen(navController: NavController, context: Context) {
 
         Button(
             onClick = {
-                SessionManager.saveLogin(context, username)
+                if (username == "student" && password == "1234") {
+                    SessionManager.saveLogin(context, username)
+                    navController.navigate("dashboard") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {

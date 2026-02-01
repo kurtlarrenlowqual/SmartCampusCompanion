@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.smartcampuscompanion.screens.LoginScreen
+import com.example.smartcampuscompanion.screens.DashboardScreen
 
 @Composable
 fun AppNavGraph(
@@ -19,6 +20,10 @@ fun AppNavGraph(
 
         composable("login") {
             LoginScreen(navController, LocalContext.current)
+        }
+
+        composable("dashboard") {
+            DashboardScreen(navController, LocalContext.current)
         }
     }
 }
