@@ -22,6 +22,8 @@ fun DashboardScreen(navController: NavController, context: Context) {
     val username = SessionManager.getUsername(context)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Text (text = "Welcome, $username!", style = MaterialTheme.typography.headlineMedium)
 
+    Spacer(modifier = Modifier.height(24.dp))
     }
 }
