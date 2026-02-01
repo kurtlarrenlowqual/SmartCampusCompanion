@@ -22,6 +22,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,38 +38,67 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 fun DashboardScreen(navController: NavController, context: Context) {
     val username = SessionManager.getUsername(context)
 
-    // Use of scaffold and TopAppBar for navigation.
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Dashboard") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
+    // State to control drawer open/close
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope() // Needed to open/close drawer
+
+    // Drawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
+                    .fillMaxHeight()
+                    .width(250.dp)
             ) {
-                Text(
-                    text = "Welcome, $username!",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-
+                // Drawer content
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Campus Information",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Text(
+                        text = "Logout",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
         }
-    )
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "Dashboard") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            // Open the drawer when hamburger is clicked
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+                    }
+                )
+            },
+            content = { paddingValues ->
+                // Dashboard content
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Welcome, $username!",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+        )
+    }
 }
