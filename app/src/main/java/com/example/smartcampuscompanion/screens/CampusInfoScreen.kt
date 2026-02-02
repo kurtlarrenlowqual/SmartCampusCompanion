@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,10 +70,8 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                                 .padding(8.dp)
                                 .clickable {
                                     // Clickable text
-                                    navController.navigate("dashboard") {
-                                        // Closes campus info screen
-                                        popUpTo("campus") { inclusive = true }
-                                    }
+                                    // Will only pop the current screen
+                                    navController.popBackStack()
                                     // Close the drawer
                                     scope.launch { drawerState.close() }
                                 }
@@ -135,6 +134,24 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                         }
                     )
                 },
+                bottomBar = {
+                    Button(
+                        onClick = {
+                            // Will pop the current screen
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding( horizontal = 10.dp)
+                            .padding( bottom = 18.dp)
+                    ) {
+                        Text(
+                            text = "Go back to dashboard",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                },
                 content = { paddingValues ->
                     // Campus info content
                     val departments = listOf(
@@ -152,6 +169,7 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                             .fillMaxSize()
                             .padding(paddingValues)
                             .padding(16.dp)
+                            .padding(horizontal = 10.dp)
                     ) {
                         items(departments) { (name, email) ->
                             Card(
@@ -187,9 +205,9 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                                     }
                                 }
                             }
-
                         }
                     }
+
                 }
             )
         }

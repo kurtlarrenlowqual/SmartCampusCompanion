@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -43,7 +47,14 @@ fun LoginScreen(navController: NavController, context: Context) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally // CENTER everything
         ) {
-
+            Icon(
+                imageVector = Icons.Filled.AccountBox,
+                contentDescription = "Campus Icon",
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .size(96.dp), // BIG icon
+                tint = androidx.compose.material3.MaterialTheme.colorScheme.primary
+            )
             // NEW: App title
             Text(
                 text = "Smart Campus Companion",
