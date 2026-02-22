@@ -33,120 +33,220 @@ import java.util.Locale
 @Composable
 fun TaskManagerScreen(navController: NavController, context: Context) {
     SmartCampusCompanionTheme {
-        // State to control drawer open/close
-        val drawerState = rememberDrawerState(DrawerValue.Closed)
-        val scope = rememberCoroutineScope() // Needed to open/close drawer
+        val appContext = LocalContext.current.applicationContext
+        val db = remember { DbProvider.get(appContext) }
+        val repo = remember { TaskRepository(db.taskDao()) }
+        val vm: TaskViewModel = viewModel(factory = TaskViewModelFactory(repo))
 
-        // Drawer
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(250.dp)
-                ) {
-                    // Drawer content
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        // Added a dashboard button in drawer
-                        Spacer(modifier = Modifier.height(70.dp))
-                        Text(
-                            text = "Dashboard",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    // Will only pop the current screen
-                                    navController.popBackStack()
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Edited the campus info button in drawer
-                        Text(
-                            text = "Campus Information",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("campus") {
-                                        // Prevents multiple instances of campus info
-                                        popUpTo("campus") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        Text(
-                            text = "Logout",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Logout functionality
-                                    navController.navigate("login") {
-                                        // Ensures user is logout even after exiting the app
-                                        SessionManager.logout(context)
-                                        popUpTo("dashboard") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
+
+        val tasks by vm.tasks.collectAsState()
+
+
+        var showAddDialog by remember { mutableStateOf(false) }
+        var editingTask by remember { mutableStateOf<TaskEntity?>(null) }
+
+
+        Scaffold(
+            topBar = {
+                TopAppBar(title = { Text("Task & Schedule Manager") })
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+                    editingTask = null
+                    showAddDialog = true
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                }
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
+                if (tasks.isEmpty()) {
+                    Text("No tasks yet. Tap + to add one.")
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(tasks) { task ->
+                            TaskCard(
+                                task = task,
+                                onEdit = {
+                                    editingTask = task
+                                    showAddDialog = true
+                                },
+                                onDelete = { vm.deleteTask(task) }
+                            )
+                        }
                     }
                 }
             }
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(
-                            text = "Campus Information",
-                            style = androidx.compose.material3.MaterialTheme.typography.titleLarge
-                        ) },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                // Open the drawer when hamburger is clicked
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu"
+
+
+            if (showAddDialog) {
+                AddOrEditTaskDialog(
+                    initial = editingTask,
+                    onDismiss = { showAddDialog = false },
+                    onSave = { title, details, dueMillis ->
+                        val existing = editingTask
+                        if (existing == null) {
+                            vm.addTask(title, details, dueMillis)
+                        } else {
+                            vm.updateTask(
+                                existing.copy(
+                                    title = title.trim(),
+                                    details = details.trim(),
+                                    dueAtMillis = dueMillis
                                 )
-                            }
+                            )
                         }
-                    )
-                },
-                bottomBar = {
-                    Button(
-                        onClick = {
-                            // Will pop the current screen
-                            navController.popBackStack()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .padding( horizontal = 10.dp)
-                            .padding( bottom = 18.dp)
-                    ) {
-                        Text(
-                            text = "Go back to dashboard",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        showAddDialog = false
                     }
-                },
-                content = { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding)) {
-                        Text("Put content here!")
-                    }
-                }
-            )
+                )
+            }
         }
     }
+}
 
+
+@Composable
+private fun TaskCard(
+    task: TaskEntity,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val fmt = remember { SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()) }
+    Card(
+        onClick = onEdit,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(task.title, style = MaterialTheme.typography.titleMedium)
+                if (task.details.isNotBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(task.details, style = MaterialTheme.typography.bodyMedium)
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Due: ${fmt.format(Date(task.dueAtMillis))}",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete")
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun AddOrEditTaskDialog(
+    initial: TaskEntity?,
+    onDismiss: () -> Unit,
+    onSave: (title: String, details: String, dueMillis: Long) -> Unit
+) {
+    val context = LocalContext.current
+
+
+    var title by remember { mutableStateOf(initial?.title ?: "") }
+    var details by remember { mutableStateOf(initial?.details ?: "") }
+
+
+    // calendar holder for date+time
+    val cal = remember {
+        Calendar.getInstance().apply {
+            timeInMillis = initial?.dueAtMillis ?: System.currentTimeMillis()
+        }
+    }
+    var dueMillis by remember { mutableLongStateOf(cal.timeInMillis) }
+
+
+    val fmt = remember { SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()) }
+
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (initial == null) "Add Task" else "Edit Task") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Task Title") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+
+                OutlinedTextField(
+                    value = details,
+                    onValueChange = { details = it },
+                    label = { Text("Details (optional)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+
+                Text("Selected: ${fmt.format(Date(dueMillis))}")
+
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(onClick = {
+                        val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
+                        DatePickerDialog(
+                            context,
+                            { _, y, m, d ->
+                                now.set(Calendar.YEAR, y)
+                                now.set(Calendar.MONTH, m)
+                                now.set(Calendar.DAY_OF_MONTH, d)
+                                dueMillis = now.timeInMillis
+                            },
+                            now.get(Calendar.YEAR),
+                            now.get(Calendar.MONTH),
+                            now.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    }) { Text("Pick Date") }
+
+
+                    Button(onClick = {
+                        val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
+                        TimePickerDialog(
+                            context,
+                            { _, hh, mm ->
+                                now.set(Calendar.HOUR_OF_DAY, hh)
+                                now.set(Calendar.MINUTE, mm)
+                                now.set(Calendar.SECOND, 0)
+                                now.set(Calendar.MILLISECOND, 0)
+                                dueMillis = now.timeInMillis
+                            },
+                            now.get(Calendar.HOUR_OF_DAY),
+                            now.get(Calendar.MINUTE),
+                            false
+                        ).show()
+                    }) { Text("Pick Time") }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (title.isBlank()) return@TextButton
+                    onSave(title, details, dueMillis)
+                }
+            ) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
