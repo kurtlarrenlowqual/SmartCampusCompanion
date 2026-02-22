@@ -11,7 +11,7 @@ The project emphasizes:
 
 ---
 
-## 👥 Team Members & Roles (as of midterms)
+## 👥 Team Members & Roles (as of Midterms)
 
 | Name | Role |
 |------|------|
@@ -27,7 +27,7 @@ The project emphasizes:
 
 The team follows a structured Git workflow to ensure code quality, consistency, and smooth collaboration:
 
-### (For prelims)
+### (For Prelims)
 1. **Project Initialization**  
    The Team Leader initializes the project and GitHub repository.
 
@@ -46,7 +46,7 @@ The team follows a structured Git workflow to ensure code quality, consistency, 
 6. **Project Monitoring**  
    The Team Leader monitors overall progress and ensures alignment with project goals.
 
-### (For midterms)
+### (For Midterms)
 1. **Branching Strategy**  
    A dedicated `feature/task-manager` and `feature/announcement` branches are created for active feature development.
 
