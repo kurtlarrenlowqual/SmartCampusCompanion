@@ -1,9 +1,7 @@
 package com.example.smartcampuscompanion.data.local
 
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
 
 @Entity(tableName = "announcements")
 data class AnnouncementEntity(
