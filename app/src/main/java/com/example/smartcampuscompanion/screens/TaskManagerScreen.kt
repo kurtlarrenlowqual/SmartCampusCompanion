@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.smartcampuscompanion.data.local.DbProvider
 import com.example.smartcampuscompanion.data.local.TaskEntity
 import com.example.smartcampuscompanion.data.repository.TaskRepository
 import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
