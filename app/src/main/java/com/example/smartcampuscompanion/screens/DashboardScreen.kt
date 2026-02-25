@@ -150,14 +150,6 @@ fun DashboardScreen(navController: NavController, context: Context) {
                             color = MaterialTheme.colorScheme.primary
                         )
 
-                        Spacer(modifier = Modifier.height(18.dp))
-
-                        Text(
-                            text = "No new announcements for you. Stay tuned!",
-                            style = MaterialTheme.typography.labelMedium,
-                            lineHeight = 40.sp
-                        )
-
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
@@ -171,6 +163,22 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         ) {
                             Text(
                                 text = "Check campus information",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                            )
+                        }
+
+                        // Added task manager button
+                        Button(
+                            onClick = {
+                                navController.navigate("tasks") {
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(top = 18.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Manage and schedule your tasks",
                                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium
                             )
                         }
