@@ -93,6 +93,22 @@ fun DashboardScreen(navController: NavController, context: Context) {
                                 }
                         )
                         Spacer(modifier = Modifier.height(20.dp)) // Added spacers
+                        // Task manager button in drawer
+                        Text(
+                            text = "Task Manager",
+                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    // Clickable text
+                                    navController.navigate("tasks") {
+                                        // Removed popupto so we can go back to dashboard
+                                    }
+                                    // Close the drawer
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
                         Text(
                             text = "Logout",
                             style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
