@@ -3,6 +3,7 @@ package com.example.smartcampuscompanion.data.local
 import android.content.Context
 import androidx.room.Room
 
+
 object DbProvider {
     @Volatile private var INSTANCE: AppDatabase? = null
 
