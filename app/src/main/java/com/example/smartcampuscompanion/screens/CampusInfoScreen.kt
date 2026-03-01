@@ -94,6 +94,21 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                                 }
                         )
                         Spacer(modifier = Modifier.height(20.dp)) // Added spacers
+                        // Edited the announcements button in drawer
+                        Text(
+                            text = "Announcements",
+                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    // Clickable text
+                                    navController.navigate("announcements") {
+                                    }
+                                    // Close the drawer
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
                         Text(
                             text = "Logout",
                             style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
