@@ -109,6 +109,22 @@ fun DashboardScreen(navController: NavController, context: Context) {
                                 }
                         )
                         Spacer(modifier = Modifier.height(20.dp)) // Added spacers
+                        // Announcement button in drawer
+                        Text(
+                            text = "Announcements",
+                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    // Clickable text
+                                    navController.navigate("announcements") {
+                                        // Removed popupto so we can go back to dashboard
+                                    }
+                                    // Close the drawer
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
                         Text(
                             text = "Logout",
                             style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
@@ -195,6 +211,22 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         ) {
                             Text(
                                 text = "Manage and schedule your tasks",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                            )
+                        }
+
+                        // Added announcements button
+                        Button(
+                            onClick = {
+                                navController.navigate("announcements") {
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(top = 18.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Don't miss out on announcements",
                                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium
                             )
                         }
