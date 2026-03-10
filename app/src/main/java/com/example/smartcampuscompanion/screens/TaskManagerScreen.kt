@@ -4,25 +4,32 @@ package com.example.smartcampuscompanion.screens
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.smartcampuscompanion.data.local.DbProvider
 import com.example.smartcampuscompanion.data.local.TaskEntity
 import com.example.smartcampuscompanion.data.repository.TaskRepository
 import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
+import com.example.smartcampuscompanion.util.SessionManager
 import com.example.smartcampuscompanion.viewmodel.TaskViewModel
 import com.example.smartcampuscompanion.viewmodel.TaskViewModelFactory
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -46,67 +53,175 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
         var editingTask by remember { mutableStateOf<TaskEntity?>(null) }
 
 
-        Scaffold(
-            topBar = {
-                TopAppBar(title = { Text("Task & Schedule Manager") })
-            },
-            floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    editingTask = null
-                    showAddDialog = true
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task")
-                }
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                if (tasks.isEmpty()) {
-                    Text("No tasks yet. Tap + to add one.")
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(tasks) { task ->
-                            TaskCard(
-                                task = task,
-                                onEdit = {
-                                    editingTask = task
-                                    showAddDialog = true
-                                },
-                                onDelete = { vm.deleteTask(task) }
-                            )
-                        }
+        // State to control drawer open/close
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+
+
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(250.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Spacer(modifier = Modifier.height(70.dp))
+                        Text(
+                            text = "Dashboard",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    navController.navigate("dashboard") {
+                                        popUpTo("dashboard") { inclusive = true }
+                                    }
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Campus Information",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    navController.navigate("campus")
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Logout",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable {
+                                    navController.navigate("login") {
+                                        SessionManager.logout(context)
+                                        popUpTo("dashboard") { inclusive = true }
+                                    }
+                                    scope.launch { drawerState.close() }
+                                }
+                        )
                     }
                 }
             }
-
-
-            if (showAddDialog) {
-                AddOrEditTaskDialog(
-                    initial = editingTask,
-                    onDismiss = { showAddDialog = false },
-                    onSave = { title, details, dueMillis ->
-                        val existing = editingTask
-                        if (existing == null) {
-                            vm.addTask(title, details, dueMillis)
-                        } else {
-                            vm.updateTask(
-                                existing.copy(
-                                    title = title.trim(),
-                                    details = details.trim(),
-                                    dueAtMillis = dueMillis
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                "Task & Schedule Manager",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch { drawerState.open() }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu"
                                 )
+                            }
+                        }
+                    )
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            editingTask = null
+                            showAddDialog = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Task")
+                    }
+                },
+                bottomBar = {
+                    Button(
+                        onClick = {
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(horizontal = 10.dp)
+                            .padding(bottom = 18.dp)
+                    ) {
+                        Text(
+                            text = "Go back to dashboard",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                }
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    if (tasks.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No tasks yet.\nTap + to add your first schedule!",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.secondary,
+                                lineHeight = 24.sp
                             )
                         }
-                        showAddDialog = false
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(vertical = 16.dp)
+                        ) {
+                            items(tasks) { task ->
+                                TaskCard(
+                                    task = task,
+                                    onEdit = {
+                                        editingTask = task
+                                        showAddDialog = true
+                                    },
+                                    onDelete = { vm.deleteTask(task) }
+                                )
+                            }
+                        }
                     }
-                )
+                }
+
+
+                if (showAddDialog) {
+                    AddOrEditTaskDialog(
+                        initial = editingTask,
+                        onDismiss = { showAddDialog = false },
+                        onSave = { title, details, dueMillis ->
+                            val existing = editingTask
+                            if (existing == null) {
+                                vm.addTask(title, details, dueMillis)
+                            } else {
+                                vm.updateTask(
+                                    existing.copy(
+                                        title = title.trim(),
+                                        details = details.trim(),
+                                        dueAtMillis = dueMillis
+                                    )
+                                )
+                            }
+                            showAddDialog = false
+                        }
+                    )
+                }
             }
         }
     }
@@ -122,28 +237,44 @@ private fun TaskCard(
     val fmt = remember { SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()) }
     Card(
         onClick = onEdit,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(task.title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    task.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 if (task.details.isNotBlank()) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(task.details, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        task.details,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     "Due: ${fmt.format(Date(task.dueAtMillis))}",
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
 
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -197,50 +328,60 @@ private fun AddOrEditTaskDialog(
                 )
 
 
-                Text("Selected: ${fmt.format(Date(dueMillis))}")
+                Text(
+                    "Selected: ${fmt.format(Date(dueMillis))}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(onClick = {
-                        val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
-                        DatePickerDialog(
-                            context,
-                            { _, y, m, d ->
-                                now.set(Calendar.YEAR, y)
-                                now.set(Calendar.MONTH, m)
-                                now.set(Calendar.DAY_OF_MONTH, d)
-                                dueMillis = now.timeInMillis
-                            },
-                            now.get(Calendar.YEAR),
-                            now.get(Calendar.MONTH),
-                            now.get(Calendar.DAY_OF_MONTH)
-                        ).show()
-                    }) { Text("Pick Date") }
+                    Button(
+                        onClick = {
+                            val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
+                            DatePickerDialog(
+                                context,
+                                { _, y, m, d ->
+                                    now.set(Calendar.YEAR, y)
+                                    now.set(Calendar.MONTH, m)
+                                    now.set(Calendar.DAY_OF_MONTH, d)
+                                    dueMillis = now.timeInMillis
+                                },
+                                now.get(Calendar.YEAR),
+                                now.get(Calendar.MONTH),
+                                now.get(Calendar.DAY_OF_MONTH)
+                            ).show()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Pick Date") }
 
 
-                    Button(onClick = {
-                        val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
-                        TimePickerDialog(
-                            context,
-                            { _, hh, mm ->
-                                now.set(Calendar.HOUR_OF_DAY, hh)
-                                now.set(Calendar.MINUTE, mm)
-                                now.set(Calendar.SECOND, 0)
-                                now.set(Calendar.MILLISECOND, 0)
-                                dueMillis = now.timeInMillis
-                            },
-                            now.get(Calendar.HOUR_OF_DAY),
-                            now.get(Calendar.MINUTE),
-                            false
-                        ).show()
-                    }) { Text("Pick Time") }
+                    Button(
+                        onClick = {
+                            val now = Calendar.getInstance().apply { timeInMillis = dueMillis }
+                            TimePickerDialog(
+                                context,
+                                { _, hh, mm ->
+                                    now.set(Calendar.HOUR_OF_DAY, hh)
+                                    now.set(Calendar.MINUTE, mm)
+                                    now.set(Calendar.SECOND, 0)
+                                    now.set(Calendar.MILLISECOND, 0)
+                                    dueMillis = now.timeInMillis
+                                },
+                                now.get(Calendar.HOUR_OF_DAY),
+                                now.get(Calendar.MINUTE),
+                                false
+                            ).show()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Pick Time") }
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
-                    if (title.isBlank()) return@TextButton
+                    if (title.isBlank()) return@Button
                     onSave(title, details, dueMillis)
                 }
             ) { Text("Save") }
