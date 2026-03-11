@@ -1,14 +1,27 @@
 package com.example.smartcampuscompanion.screens
 
 import android.content.Context
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.smartcampuscompanion.data.local.AnnouncementEntity
@@ -20,9 +33,7 @@ import com.example.smartcampuscompanion.viewmodel.AnnouncementViewModel
 import com.example.smartcampuscompanion.viewmodel.AnnouncementViewModelFactory
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,166 +44,123 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
         val repo = remember { AnnouncementRepository(db.announcementDao()) }
         val vm: AnnouncementViewModel = viewModel(factory = AnnouncementViewModelFactory(repo))
 
-        // State to control drawer open/close
         val drawerState = rememberDrawerState(DrawerValue.Closed)
-        val scope = rememberCoroutineScope() // Needed to open/close drawer
-
-
-        // seed once
-        LaunchedEffect(Unit) { vm.seedIfNeeded() }
-
-
+        val scope = rememberCoroutineScope()
         val items by vm.announcements.collectAsState()
 
-        // Drawer
+        LaunchedEffect(Unit) { vm.seedIfNeeded() }
+
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(250.dp)
-                ) {
-                    // Drawer content
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        // Added a dashboard button in drawer
-                        Spacer(modifier = Modifier.height(70.dp))
+                ModalDrawerSheet(modifier = Modifier.width(300.dp)) {
+                    // Header
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer))),
+                        contentAlignment = Alignment.BottomStart
+                    ) {
                         Text(
-                            text = "Dashboard",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    // Will only pop the current screen
-                                    navController.popBackStack()
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
+                            "Smart Campus",
+                            Modifier.padding(24.dp),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Edited the campus info button in drawer
-                        Text(
-                            text = "Campus Information",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("campus") {
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Edited the announcements button in drawer
-                        Text(
-                            text = "Announcements",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("announcements") {
-                                        // Prevents multiple instances of announcements
-                                        popUpTo("announcements") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        Text(
-                            text = "Logout",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Logout functionality
-                                    navController.navigate("login") {
-                                        // Ensures user is logout even after exiting the app
-                                        SessionManager.logout(context)
-                                        popUpTo("dashboard") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Nav Items
+                    DrawerItem("Dashboard", Icons.Default.Dashboard) {
+                        scope.launch { drawerState.close() }
+                        navController.popBackStack()
+                    }
+                    DrawerItem("Campus Info", Icons.Default.Info) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("campus")
+                    }
+                    DrawerItem("Announcements", Icons.Default.Notifications, true) {
+                        scope.launch { drawerState.close() }
+                    }
+
+                    HorizontalDivider(Modifier.padding(16.dp))
+
+                    DrawerItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
+                        scope.launch { drawerState.close() }
+                        SessionManager.logout(context)
+                        navController.navigate("login") { popUpTo("dashboard") { inclusive = true } }
                     }
                 }
             }
         ) {
             Scaffold(
-                topBar = { TopAppBar(title = { Text("Campus Announcements") }) }
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text("Campus News", fontWeight = FontWeight.Bold) },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, "Menu")
+                            }
+                        }
+                    )
+                }
             ) { padding ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp)
-                ) {
+                Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                     if (items.isEmpty()) {
-                        Text("No announcements yet.")
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No announcements yet.", color = MaterialTheme.colorScheme.outline)
+                        }
                     } else {
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             items(items) { ann ->
-                                AnnouncementCard(
-                                    item = ann,
-                                    onClick = { if (!ann.isRead) vm.markRead(ann.id) }
-                                )
+                                AnnouncementCard(ann) { if (!ann.isRead) vm.markRead(ann.id) }
                             }
                         }
                     }
                 }
             }
         }
-
     }
 }
 
+@Composable
+fun DrawerItem(label: String, icon: ImageVector, selected: Boolean = false, onClick: () -> Unit) {
+    NavigationDrawerItem(
+        label = { Text(label) },
+        icon = { Icon(icon, null) },
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
+    )
+}
 
 @Composable
-private fun AnnouncementCard(
-    item: AnnouncementEntity,
-    onClick: () -> Unit
-) {
-    val fmt = remember { SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault()) }
-
+fun AnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
+    val fmt = remember { SimpleDateFormat("MMM dd, hh:mm a", Locale.getDefault()) }
+    val bgColor by animateColorAsState(if (item.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer.copy(0.1f))
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = bgColor),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(if (item.isRead) 1.dp else 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                AssistChip(
-                    onClick = { /* just label */ },
-                    label = { Text(if (item.isRead) "Read" else "Unread") }
-                )
-            }
-
-
-            Spacer(Modifier.height(8.dp))
-            Text(item.body, style = MaterialTheme.typography.bodyMedium)
-
-
-            Spacer(Modifier.height(12.dp))
-            Text(
-                "Posted: ${fmt.format(Date(item.postedAtMillis))}",
-                style = MaterialTheme.typography.labelSmall
-            )
-
-
+        Row(Modifier.padding(16.dp)) {
             if (!item.isRead) {
+                Box(Modifier.size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape).align(Alignment.CenterVertically))
+                Spacer(Modifier.width(12.dp))
+            }
+            Column {
+                Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(item.body, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
                 Spacer(Modifier.height(8.dp))
-                Text("Tap to mark as read", style = MaterialTheme.typography.labelMedium)
+                Text(fmt.format(Date(item.postedAtMillis)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
             }
         }
     }
