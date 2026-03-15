@@ -15,23 +15,19 @@ class AnnouncementViewModel(private val repo: AnnouncementRepository) : ViewMode
         repo.observeAnnouncements()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val unreadCount: StateFlow<Int> =
-        repo.observeUnreadCount()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
-
     fun seedIfNeeded() {
         viewModelScope.launch { repo.ensureSeedData() }
     }
 
-    fun markRead(id: Int) {
-        viewModelScope.launch { repo.markRead(id) }
-    }
-
-    fun markAllRead() {
-        viewModelScope.launch { repo.markAllRead() }
+    // This is the function causing the red error, because the 'repo' doesn't have it yet!
+    fun updateReadStatus(id: Int, isRead: Boolean) {
+        viewModelScope.launch {
+            repo.updateReadStatus(id, isRead)
+        }
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 class AnnouncementViewModelFactory(private val repo: AnnouncementRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AnnouncementViewModel(repo) as T

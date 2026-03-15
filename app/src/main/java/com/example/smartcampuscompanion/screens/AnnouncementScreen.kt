@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,7 +52,6 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
 
-        // Ensure we observe changes so the UI reacts instantly when marked as read
         val items by vm.announcements.collectAsState(initial = emptyList())
 
         LaunchedEffect(Unit) { vm.seedIfNeeded() }
@@ -85,45 +86,20 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                                 color = Color.White.copy(alpha = 0.2f),
                                 modifier = Modifier.size(56.dp)
                             ) {
-                                Icon(
-                                    Icons.Default.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.padding(12.dp)
-                                )
+                                Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.padding(12.dp))
                             }
                             Spacer(Modifier.height(16.dp))
-                            Text(
-                                "Smart Campus",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color.White
-                            )
-                            Text(
-                                "Connected Excellence",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.7f)
-                            )
+                            Text("Smart Campus", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text("Connected Excellence", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.7f))
                         }
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
-                        scope.launch { drawerState.close() }
-                        navController.popBackStack()
-                    }
-                    DrawerMenuItem("Campus Information", Icons.Default.Info) {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("campus")
-                    }
-                    DrawerMenuItem("Task Manager", Icons.Default.Assignment) {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("tasks")
-                    }
-                    DrawerMenuItem("Announcements", Icons.Default.Campaign, isSelected = true) {
-                        scope.launch { drawerState.close() }
-                    }
+                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) { scope.launch { drawerState.close() }; navController.popBackStack() }
+                    DrawerMenuItem("Campus Information", Icons.Default.Info) { scope.launch { drawerState.close() }; navController.navigate("campus") }
+                    DrawerMenuItem("Task Manager", Icons.AutoMirrored.Filled.Assignment) { scope.launch { drawerState.close() }; navController.navigate("tasks") }
+                    DrawerMenuItem("Announcements", Icons.Default.Campaign, isSelected = true) { scope.launch { drawerState.close() } }
 
                     Spacer(Modifier.weight(1f))
                     HorizontalDivider(Modifier.padding(horizontal = 24.dp))
@@ -140,21 +116,12 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
             Scaffold(
                 topBar = {
                     CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                "Updates",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
+                        title = { Text("Updates", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.MenuOpen, contentDescription = "Menu")
+                                Icon(Icons.AutoMirrored.Filled.MenuOpen, contentDescription = "Menu")
                             }
-                        },
-                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
+                        }
                     )
                 }
             ) { padding ->
@@ -170,9 +137,13 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             items(items, key = { it.id }) { ann ->
-                                AestheticAnnouncementCard(ann) {
-                                    if (!ann.isRead) vm.markRead(ann.id)
-                                }
+                                AestheticAnnouncementCard(
+                                    item = ann,
+                                    onToggleRead = {
+                                        // THE FIX: Removed .toLong(), passing the Int directly
+                                        vm.updateReadStatus(ann.id, !ann.isRead)
+                                    }
+                                )
                             }
                         }
                     }
@@ -183,12 +154,7 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
 }
 
 @Composable
-fun DrawerMenuItem(
-    label: String,
-    icon: ImageVector,
-    isSelected: Boolean = false,
-    onClick: () -> Unit
-) {
+fun DrawerMenuItem(label: String, icon: ImageVector, isSelected: Boolean = false, onClick: () -> Unit) {
     NavigationDrawerItem(
         label = { Text(label, fontWeight = FontWeight.Medium) },
         icon = { Icon(icon, null) },
@@ -205,40 +171,51 @@ fun DrawerMenuItem(
 }
 
 @Composable
-fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
+fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit) {
     val fmt = remember { SimpleDateFormat("EEEE, MMM dd • hh:mm a", Locale.getDefault()) }
 
-    // Smooth transition between colors based on isRead status
     val cardBg by animateColorAsState(
-        targetValue = if (item.isRead)
-            MaterialTheme.colorScheme.surface
-        else
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f), // Light tint when unread
+        targetValue = if (item.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
         label = "CardColorAnimation"
     )
 
-    val elevation by animateDpAsState(
-        targetValue = if (item.isRead) 0.dp else 4.dp,
-        label = "ElevationAnimation"
-    )
+    val elevation by animateDpAsState(targetValue = if (item.isRead) 0.dp else 4.dp, label = "ElevationAnimation")
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onToggleRead() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         border = if (item.isRead) CardDefaults.outlinedCardBorder() else BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (!item.isRead) {
+                    Surface(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)) {
+                        Text(
+                            text = "Unread",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
 
             Spacer(Modifier.height(8.dp))
 
@@ -258,11 +235,7 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Time Badge
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
+                Surface(color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f), shape = RoundedCornerShape(8.dp)) {
                     Text(
                         text = fmt.format(Date(item.postedAtMillis)),
                         style = MaterialTheme.typography.labelSmall,
@@ -271,15 +244,10 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     )
                 }
 
-                // Explicit Status Button
                 if (!item.isRead) {
                     Button(
-                        onClick = onClick,
+                        onClick = onToggleRead,
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                         modifier = Modifier.height(36.dp)
                     ) {
@@ -287,26 +255,16 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     }
                 } else {
                     OutlinedButton(
-                        onClick = { /* Do nothing, already read */ },
+                        onClick = onToggleRead,
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.outline
-                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                         modifier = Modifier.height(36.dp)
                     ) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = "Read",
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Icon(Icons.Default.Check, contentDescription = "Read", modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "Read",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Text(text = "Read", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     }
                 }
             }
@@ -321,17 +279,8 @@ fun EmptyState() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            Icons.Default.AutoAwesomeMotion,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.outlineVariant
-        )
+        Icon(Icons.Default.AutoAwesomeMotion, null, modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.outlineVariant)
         Spacer(Modifier.height(16.dp))
-        Text(
-            "Nothing new yet",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.outline
-        )
+        Text("Nothing new yet", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline)
     }
 }

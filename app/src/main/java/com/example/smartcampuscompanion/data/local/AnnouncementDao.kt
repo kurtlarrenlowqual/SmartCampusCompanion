@@ -15,15 +15,11 @@ interface AnnouncementDao {
     @Update
     suspend fun update(item: AnnouncementEntity)
 
-    @Query("UPDATE announcements SET isRead = 1 WHERE id = :id")
-    suspend fun markRead(id: Int)
-
-    @Query("SELECT COUNT(*) FROM announcements WHERE isRead = 0")
-    fun observeUnreadCount(): Flow<Int>
-
-    @Query("UPDATE announcements SET isRead = 1")
-    suspend fun markAllRead()
-
     @Query("SELECT COUNT(*) FROM announcements")
     suspend fun countAll(): Int
+
+    // THE FIX: Changed 'id: Long' to 'id: Int' so it matches the rest of your app!
+    @Query("UPDATE announcements SET isRead = :isRead WHERE id = :id")
+    suspend fun updateReadStatus(id: Int, isRead: Boolean)
+
 }
