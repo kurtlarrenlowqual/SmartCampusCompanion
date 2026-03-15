@@ -62,7 +62,6 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                     drawerContainerColor = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.width(310.dp)
                 ) {
-                    // --- Aesthetic Drawer Header ---
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -110,7 +109,6 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // --- Updated Navigation Menu Items ---
                     DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
                         scope.launch { drawerState.close() }
                         navController.popBackStack()
@@ -171,7 +169,6 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                             contentPadding = PaddingValues(20.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            // Added key = { it.id } to help compose track item changes efficiently
                             items(items, key = { it.id }) { ann ->
                                 AestheticAnnouncementCard(ann) {
                                     if (!ann.isRead) vm.markRead(ann.id)
@@ -216,7 +213,7 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
         targetValue = if (item.isRead)
             MaterialTheme.colorScheme.surface
         else
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f), // Tinted when unread
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f), // Light tint when unread
         label = "CardColorAnimation"
     )
 
@@ -235,35 +232,13 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
         border = if (item.isRead) CardDefaults.outlinedCardBorder() else BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Explicit Unread Badge
-                if (!item.isRead) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Unread",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(Modifier.height(8.dp))
 
@@ -296,32 +271,41 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     )
                 }
 
-                // Interactive Action Button / Read Confirmation
+                // Explicit Status Button
                 if (!item.isRead) {
                     Button(
                         onClick = onClick,
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                         modifier = Modifier.height(36.dp)
                     ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
                         Text("Mark as Read", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }
                 } else {
-                    // Feedback text once read
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(
+                        onClick = { /* Do nothing, already read */ },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.outline
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        modifier = Modifier.height(36.dp)
+                    ) {
                         Icon(
-                            Icons.Default.DoneAll,
+                            Icons.Default.Check,
                             contentDescription = "Read",
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text(
                             text = "Read",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
