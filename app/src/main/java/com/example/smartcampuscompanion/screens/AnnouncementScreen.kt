@@ -81,16 +81,9 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                                 .align(Alignment.BottomStart)
                                 .padding(24.dp)
                         ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = Color.White.copy(alpha = 0.2f),
-                                modifier = Modifier.size(56.dp)
-                            ) {
-                                Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.padding(12.dp))
-                            }
                             Spacer(Modifier.height(16.dp))
-                            Text("Smart Campus", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                            Text("Connected Excellence", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.7f))
+                            Text("Smart Campus", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text("COMPANION APP", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.7f))
                         }
                     }
 
@@ -198,7 +191,7 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit
             ) {
                 Text(
                     text = item.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
@@ -210,7 +203,6 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit
                             text = "Unread",
                             color = MaterialTheme.colorScheme.onPrimary,
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -221,7 +213,8 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit
 
             Text(
                 text = item.body,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
@@ -239,20 +232,14 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit
                     Text(
                         text = fmt.format(Date(item.postedAtMillis)),
                         style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
 
                 if (!item.isRead) {
-                    Button(
-                        onClick = onToggleRead,
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text("Mark as Read", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                    }
+
                 } else {
                     OutlinedButton(
                         onClick = onToggleRead,
@@ -264,7 +251,6 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onToggleRead: () -> Unit
                     ) {
                         Icon(Icons.Default.Check, contentDescription = "Read", modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(text = "Read", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium)
                     }
                 }
             }
