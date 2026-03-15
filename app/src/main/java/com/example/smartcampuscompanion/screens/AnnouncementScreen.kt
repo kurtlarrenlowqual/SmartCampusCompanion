@@ -3,6 +3,7 @@ package com.example.smartcampuscompanion.screens
 import android.content.Context
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,7 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,7 +49,9 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
 
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
-        val items by vm.announcements.collectAsState()
+
+        // Ensure we observe changes so the UI reacts instantly when marked as read
+        val items by vm.announcements.collectAsState(initial = emptyList())
 
         LaunchedEffect(Unit) { vm.seedIfNeeded() }
 
@@ -108,13 +110,18 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    DrawerMenuItem("Dashboard", Icons.Default.GridView) {
+                    // --- Updated Navigation Menu Items ---
+                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
                         scope.launch { drawerState.close() }
                         navController.popBackStack()
                     }
-                    DrawerMenuItem("Campus Maps", Icons.Default.Map) {
+                    DrawerMenuItem("Campus Information", Icons.Default.Info) {
                         scope.launch { drawerState.close() }
                         navController.navigate("campus")
+                    }
+                    DrawerMenuItem("Task Manager", Icons.Default.Assignment) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("tasks")
                     }
                     DrawerMenuItem("Announcements", Icons.Default.Campaign, isSelected = true) {
                         scope.launch { drawerState.close() }
@@ -164,7 +171,8 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                             contentPadding = PaddingValues(20.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(items) { ann ->
+                            // Added key = { it.id } to help compose track item changes efficiently
+                            items(items, key = { it.id }) { ann ->
                                 AestheticAnnouncementCard(ann) {
                                     if (!ann.isRead) vm.markRead(ann.id)
                                 }
@@ -208,7 +216,7 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
         targetValue = if (item.isRead)
             MaterialTheme.colorScheme.surface
         else
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), // Tinted when unread
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f), // Tinted when unread
         label = "CardColorAnimation"
     )
 
@@ -224,23 +232,14 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-        border = if (item.isRead) CardDefaults.outlinedCardBorder() else null
+        border = if (item.isRead) CardDefaults.outlinedCardBorder() else BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Status Indicator Dot
-                if (!item.isRead) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                }
-
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -248,6 +247,22 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
+
+                // Explicit Unread Badge
+                if (!item.isRead) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Unread",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -281,7 +296,7 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     )
                 }
 
-                // Interactive Action Button
+                // Interactive Action Button / Read Confirmation
                 if (!item.isRead) {
                     Button(
                         onClick = onClick,
@@ -291,16 +306,24 @@ fun AestheticAnnouncementCard(item: AnnouncementEntity, onClick: () -> Unit) {
                     ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Read", style = MaterialTheme.typography.labelLarge)
+                        Text("Mark as Read", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     }
                 } else {
-                    // Feedback icon once read
-                    Icon(
-                        Icons.Default.DoneAll,
-                        contentDescription = "Read",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                        modifier = Modifier.size(22.dp)
-                    )
+                    // Feedback text once read
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.DoneAll,
+                            contentDescription = "Read",
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "Read",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
         }
