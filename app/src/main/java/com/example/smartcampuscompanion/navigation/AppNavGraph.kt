@@ -5,9 +5,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.smartcampuscompanion.screens.AnnouncementsScreen
 import com.example.smartcampuscompanion.screens.LoginScreen
 import com.example.smartcampuscompanion.screens.DashboardScreen
 import com.example.smartcampuscompanion.screens.CampusInfoScreen
+import com.example.smartcampuscompanion.screens.TaskManagerScreen
 
 @Composable
 fun AppNavGraph(
@@ -27,9 +29,18 @@ fun AppNavGraph(
             DashboardScreen(navController, LocalContext.current)
         }
 
-        // include campus info screen in navigation
         composable("campus") {
             CampusInfoScreen(navController, LocalContext.current)
         }
+
+        composable("tasks") {
+            TaskManagerScreen(navController, LocalContext.current)
+        }
+
+
+        composable("announcements") {
+            AnnouncementsScreen(navController, LocalContext.current)
+        }
+
     }
 }
