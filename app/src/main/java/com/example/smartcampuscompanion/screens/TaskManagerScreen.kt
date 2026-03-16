@@ -35,10 +35,8 @@ import com.example.smartcampuscompanion.data.local.DbProvider
 import com.example.smartcampuscompanion.data.local.TaskEntity
 import com.example.smartcampuscompanion.data.repository.TaskRepository
 import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
-import com.example.smartcampuscompanion.util.SessionManager
 import com.example.smartcampuscompanion.viewmodel.TaskViewModel
 import com.example.smartcampuscompanion.viewmodel.TaskViewModelFactory
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -51,7 +49,9 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
         val repo = remember { TaskRepository(db.taskDao()) }
         val vm: TaskViewModel = viewModel(factory = TaskViewModelFactory(repo))
 
+
         val tasks by vm.tasks.collectAsState()
+
 
         var showAddDialog by remember { mutableStateOf(false) }
         var editingTask by remember { mutableStateOf<TaskEntity?>(null) }
@@ -212,32 +212,34 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                         }
                     }
                 }
+            }
 
-                if (showAddDialog) {
-                    AddOrEditTaskDialog(
-                        initial = editingTask,
-                        onDismiss = { showAddDialog = false },
-                        onSave = { title, details, dueMillis ->
-                            val existing = editingTask
-                            if (existing == null) {
-                                vm.addTask(title, details, dueMillis)
-                            } else {
-                                vm.updateTask(
-                                    existing.copy(
-                                        title = title.trim(),
-                                        details = details.trim(),
-                                        dueAtMillis = dueMillis
-                                    )
+
+            if (showAddDialog) {
+                AddOrEditTaskDialog(
+                    initial = editingTask,
+                    onDismiss = { showAddDialog = false },
+                    onSave = { title, details, dueMillis ->
+                        val existing = editingTask
+                        if (existing == null) {
+                            vm.addTask(title, details, dueMillis)
+                        } else {
+                            vm.updateTask(
+                                existing.copy(
+                                    title = title.trim(),
+                                    details = details.trim(),
+                                    dueAtMillis = dueMillis
                                 )
-                            }
-                            showAddDialog = false
+                            )
                         }
-                    )
-                }
+                        showAddDialog = false
+                    }
+                )
             }
         }
     }
 }
+
 
 @Composable
 private fun TaskCard(
