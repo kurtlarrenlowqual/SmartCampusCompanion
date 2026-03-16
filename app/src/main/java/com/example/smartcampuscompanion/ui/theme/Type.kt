@@ -39,7 +39,6 @@ val Typography = Typography(
     ),
     labelMedium = TextStyle(
         fontFamily = JostFont,
-        fontWeight = FontWeight.SemiBold,
         fontSize = 15.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp

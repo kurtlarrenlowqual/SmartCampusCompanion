@@ -1,257 +1,226 @@
 package com.example.smartcampuscompanion.screens
 
 import android.content.Context
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
 import com.example.smartcampuscompanion.util.SessionManager
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController, context: Context) {
     SmartCampusCompanionTheme {
-
         val username = SessionManager.getUsername(context)
-
-        // State to control drawer open/close
         val drawerState = rememberDrawerState(DrawerValue.Closed)
-        val scope = rememberCoroutineScope() // Needed to open/close drawer
+        val scope = rememberCoroutineScope()
 
-        // Drawer
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(250.dp)
+                ModalDrawerSheet(
+                    drawerContainerColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.width(310.dp)
                 ) {
-                    // Drawer content
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        // Added a dashboard button in drawer
-                        Spacer(modifier = Modifier.height(70.dp))
-                        Text(
-                            text = "Dashboard",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.tertiary
+                                    )
+                                )
+                            )
+                    ) {
+                        Column(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("dashboard") {
-                                        // Prevents multiple instances of dashboard
-                                        popUpTo("dashboard") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Edited the campus info button in drawer
-                        Text(
-                            text = "Campus Information",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("campus") {
-                                        // Removed popupto so we can go back to dashboard
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Task manager button in drawer
-                        Text(
-                            text = "Task Manager",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("tasks") {
-                                        // Removed popupto so we can go back to dashboard
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        // Announcement button in drawer
-                        Text(
-                            text = "Announcements",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Clickable text
-                                    navController.navigate("announcements") {
-                                        // Removed popupto so we can go back to dashboard
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
-                        Spacer(modifier = Modifier.height(20.dp)) // Added spacers
-                        Text(
-                            text = "Logout",
-                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    // Logout functionality
-                                    navController.navigate("login") {
-                                        // Ensures user is logout even after exiting the app
-                                        SessionManager.logout(context)
-                                        popUpTo("dashboard") { inclusive = true }
-                                    }
-                                    // Close the drawer
-                                    scope.launch { drawerState.close() }
-                                }
-                        )
+                                .align(Alignment.BottomStart)
+                                .padding(24.dp)
+                        ) {
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "Smart Campus",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
+                            )
+                            Text(
+                                "COMPANION APP",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
                     }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard, isSelected = true) {
+                        scope.launch { drawerState.close() }
+                    }
+                    DrawerMenuItem("Campus Information", Icons.Default.Info) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("campus")
+                    }
+                    DrawerMenuItem("Task Manager", Icons.AutoMirrored.Filled.Assignment) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("tasks")
+                    }
+                    DrawerMenuItem("Announcements", Icons.Default.Campaign) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("announcements")
+                    }
+
+                    Spacer(Modifier.weight(1f))
+                    HorizontalDivider(Modifier.padding(horizontal = 24.dp))
+
+                    DrawerMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
+                        scope.launch { drawerState.close() }
+                        SessionManager.logout(context)
+                        navController.navigate("login") {
+                            popUpTo("dashboard") { inclusive = true }
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         ) {
             Scaffold(
                 topBar = {
-                    TopAppBar(
-                        title = { Text(
-                            text = "Dashboard",
-                            style = androidx.compose.material3.MaterialTheme.typography.titleLarge
-                            ) },
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                "Dashboard",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
                         navigationIcon = {
-                            IconButton(onClick = {
-                                // Open the drawer when hamburger is clicked
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu"
-                                )
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.AutoMirrored.Filled.MenuOpen, contentDescription = "Menu")
                             }
                         }
                     )
-                },
-                content = { paddingValues ->
-                    // Dashboard content
+                }
+            ) { padding ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(16.dp)
-                            .padding(horizontal = 10.dp)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            text = "Welcome to your dashboard, $username!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 30.sp,
-                            lineHeight = 40.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Card(
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                            )
+                        ) {
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Text(
+                                    text = "Welcome back, $username!",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = "Manage your campus tasks, stay informed, and access school information in one place.",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
 
                         Button(
-                            onClick = {
-                                navController.navigate("campus") {
-                                }
-                            },
+                            onClick = { navController.navigate("campus") },
                             modifier = Modifier
-                                .padding(top = 18.dp)
                                 .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(18.dp)
                         ) {
                             Text(
                                 text = "Check campus information",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
-                            )
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                                )
                         }
 
-                        // Added task manager button
                         Button(
-                            onClick = {
-                                navController.navigate("tasks") {
-                                }
-                            },
+                            onClick = { navController.navigate("tasks") },
                             modifier = Modifier
-                                .padding(top = 18.dp)
                                 .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(18.dp)
                         ) {
                             Text(
                                 text = "Manage and schedule your tasks",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
                             )
                         }
 
-                        // Added announcements button
                         Button(
-                            onClick = {
-                                navController.navigate("announcements") {
-                                }
-                            },
+                            onClick = { navController.navigate("announcements") },
                             modifier = Modifier
-                                .padding(top = 18.dp)
                                 .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(18.dp)
                         ) {
                             Text(
                                 text = "Don't miss out on announcements",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
                             )
                         }
 
-
                         OutlinedButton(
                             onClick = {
+                                SessionManager.logout(context)
                                 navController.navigate("login") {
-                                    // Ensures user is logged out even after exiting the app
-                                    SessionManager.logout(context)
                                     popUpTo("dashboard") { inclusive = true }
                                 }
                             },
                             modifier = Modifier
-                                .padding(top = 18.dp)
                                 .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(18.dp)
                         ) {
                             Text(
                                 text = "Log out of your account",
-                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
                 }
-            )
+            }
         }
     }
 }
