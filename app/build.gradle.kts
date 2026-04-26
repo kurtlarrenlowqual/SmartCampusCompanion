@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -71,18 +72,15 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.compose.foundation)
 
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-
-// Firebase
-    implementation("com.google.firebase:firebase-auth-ktx")
+    // Firebase BOM - manages all Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
 
-// Encryption
-    implementation("org.mindrot:jbcrypt:0.4")
-
-// Coroutines
+// Coroutines for Firestore
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
+// DataStore (replaces SharedPreferences for dark mode / notification prefs)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
 
 }
