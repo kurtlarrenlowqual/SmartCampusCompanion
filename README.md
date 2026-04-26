@@ -16,8 +16,8 @@ The project emphasizes:
 | Name | Role |
 |------|------|
 | **Rosales, Kurt Larren** | Team Leader, Git Manager, UI/UX Developer |
-| **Narzoles, Kirby Ian** | Feature Developer (task-manager) |
-| **Opo, Lourein** | Feature Developer (announcements) |
+| **Narzoles, Kirby Ian** | Feature Developer |
+| **Opo, Lourein** | Feature Developer |
 | **Salcedo, Joemrich Jovin** | UI/UX Developer |
 
 ---
