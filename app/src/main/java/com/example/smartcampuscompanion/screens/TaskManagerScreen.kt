@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,15 +18,16 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -37,6 +37,9 @@ import com.example.smartcampuscompanion.data.repository.TaskRepository
 import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
 import com.example.smartcampuscompanion.viewmodel.TaskViewModel
 import com.example.smartcampuscompanion.viewmodel.TaskViewModelFactory
+import com.example.smartcampuscompanion.util.SessionManager
+import com.example.smartcampuscompanion.notifications.TaskAlarmScheduler
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -118,7 +121,7 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                         scope.launch { drawerState.close() }
                         navController.navigate("announcements")
                     }
-
+                    DrawerMenuItem("Settings", Icons.Default.Settings) { scope.launch { drawerState.close() }; navController.navigate("settings") }
                     Spacer(Modifier.weight(1f))
                     HorizontalDivider(Modifier.padding(horizontal = 24.dp))
 
@@ -206,7 +209,12 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                                         editingTask = task
                                         showAddDialog = true
                                     },
-                                    onDelete = { vm.deleteTask(task) }
+                                    onDelete = {
+                                        val alarmId = (task.dueAtMillis % Int.MAX_VALUE).toInt()
+                                        TaskAlarmScheduler.cancel(context, alarmId, task.title)
+                                        vm.deleteTask(task)
+                                    }
+
                                 )
                             }
                         }
@@ -223,17 +231,20 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                         val existing = editingTask
                         if (existing == null) {
                             vm.addTask(title, details, dueMillis)
+                            // Schedule notification
+                            val alarmId = (dueMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.schedule(context, alarmId, title, dueMillis)
                         } else {
-                            vm.updateTask(
-                                existing.copy(
-                                    title = title.trim(),
-                                    details = details.trim(),
-                                    dueAtMillis = dueMillis
-                                )
-                            )
+                            // Cancel old alarm, schedule new one
+                            val oldAlarmId = (existing.dueAtMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.cancel(context, oldAlarmId, existing.title)
+                            vm.updateTask(existing.copy(title = title.trim(), details = details.trim(), dueAtMillis = dueMillis))
+                            val newAlarmId = (dueMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.schedule(context, newAlarmId, title, dueMillis)
                         }
                         showAddDialog = false
                     }
+
                 )
             }
         }
