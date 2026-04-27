@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.*
@@ -17,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -24,11 +24,42 @@ import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
 import com.example.smartcampuscompanion.util.SessionManager
 import kotlinx.coroutines.launch
 
+@Composable
+fun DashboardTile(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+        ),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(40.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(navController: NavController, context: Context) {
+fun AdminDashboardScreen(navController: NavController, context: Context) {
     SmartCampusCompanionTheme {
-
         val username = SessionManager.getUsername(context)
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -40,7 +71,6 @@ fun DashboardScreen(navController: NavController, context: Context) {
                     drawerContainerColor = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.width(310.dp)
                 ) {
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -57,24 +87,27 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         Column(
                             modifier = Modifier.align(Alignment.BottomStart).padding(24.dp)
                         ) {
-                            Text("Smart Campus", fontWeight = FontWeight.ExtraBold, color = Color.White)
-                            Text("COMPANION APP", color = Color.White.copy(0.7f))
+                            Text("Admin Panel", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text(username, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(0.7f))
                         }
                     }
 
                     Spacer(Modifier.height(16.dp))
 
-                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard, true) {
+                    DrawerMenuItem("Admin Dashboard", Icons.Default.AdminPanelSettings, true) {
                         scope.launch { drawerState.close() }
                     }
-                    DrawerMenuItem("Campus", Icons.Default.Info) {
-                        scope.launch { drawerState.close() }; navController.navigate("campus")
+                    DrawerMenuItem("Post Announcement", Icons.Default.Campaign) {
+                        scope.launch { drawerState.close() }; navController.navigate("post_announcement")
                     }
-                    DrawerMenuItem("Tasks", Icons.AutoMirrored.Filled.Assignment) {
-                        scope.launch { drawerState.close() }; navController.navigate("tasks")
-                    }
-                    DrawerMenuItem("Announcements", Icons.Default.Campaign) {
+                    DrawerMenuItem("Announcements", Icons.Default.Notifications) {
                         scope.launch { drawerState.close() }; navController.navigate("announcements")
+                    }
+                    DrawerMenuItem("Manage Accounts", Icons.Default.ManageAccounts) {
+                        scope.launch { drawerState.close() }; navController.navigate("add_account")
+                    }
+                    DrawerMenuItem("Settings", Icons.Default.Settings) {
+                        scope.launch { drawerState.close() }; navController.navigate("settings")
                     }
 
                     Spacer(Modifier.weight(1f))
@@ -84,7 +117,7 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         scope.launch { drawerState.close() }
                         SessionManager.logout(context)
                         navController.navigate("login") {
-                            popUpTo("dashboard") { inclusive = true }
+                            popUpTo("admin_dashboard") { inclusive = true }
                         }
                     }
                 }
@@ -93,7 +126,7 @@ fun DashboardScreen(navController: NavController, context: Context) {
             Scaffold(
                 topBar = {
                     CenterAlignedTopAppBar(
-                        title = { Text("Dashboard", fontWeight = FontWeight.Bold) },
+                        title = { Text("Admin Dashboard", fontWeight = FontWeight.Bold) },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(Icons.AutoMirrored.Filled.MenuOpen, null)
@@ -111,7 +144,7 @@ fun DashboardScreen(navController: NavController, context: Context) {
                 ) {
 
                     Text(
-                        "Welcome, $username",
+                        "Welcome, Admin $username",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -124,18 +157,18 @@ fun DashboardScreen(navController: NavController, context: Context) {
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         item {
-                            DashboardTile("Campus", Icons.Default.Info) {
-                                navController.navigate("campus")
+                            DashboardTile("Post", Icons.Default.Campaign) {
+                                navController.navigate("post_announcement")
                             }
                         }
                         item {
-                            DashboardTile("Tasks", Icons.AutoMirrored.Filled.Assignment) {
-                                navController.navigate("tasks")
-                            }
-                        }
-                        item {
-                            DashboardTile("Announcements", Icons.Default.Campaign) {
+                            DashboardTile("Announcements", Icons.Default.Notifications) {
                                 navController.navigate("announcements")
+                            }
+                        }
+                        item {
+                            DashboardTile("Accounts", Icons.Default.ManageAccounts) {
+                                navController.navigate("add_account")
                             }
                         }
                         item {

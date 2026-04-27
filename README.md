@@ -15,11 +15,10 @@ The project emphasizes:
 
 | Name | Role |
 |------|------|
-| **Rosales, Kurt Larren** | Team Leader, Git Manager, Quality Assurance |
-| **Mejia, Jay-em** | Feature Developer (announcements)|
-| **Narzoles, Kirby Ian** | Feature Developer (task-manager) |
-| **Opo, Lourein** | UI/UX Developer (task-manager) |
-| **Salcedo, Joemrich Jovin** | UI/UX Developer (announcements) |
+| **Rosales, Kurt Larren** | Team Leader, Git Manager, UI/UX Developer |
+| **Narzoles, Kirby Ian** | Feature Developer |
+| **Opo, Lourein** | Feature Developer |
+| **Salcedo, Joemrich Jovin** | UI/UX Developer |
 
 ---
 
@@ -61,5 +60,19 @@ The team follows a structured Git workflow to ensure code quality, consistency, 
 
 6. **Project Monitoring**  
    The Team Leader monitors overall progress and ensures alignment with project goals.
+
+### (For Finals)
+1. **Branching Strategy**  
+   A dedicated branches are created for active feature development.
+
+3. **Task Assignment**  
+   Roles and development tasks are assigned to each team member.
+
+5. **Commit & Push Management**  
+   The Git Manager oversees commit messages, merges, and pushes to avoid conflicts.
+
+6. **Project Monitoring**  
+   The Team Leader monitors overall progress and ensures alignment with project goals.
+
 
 ---
