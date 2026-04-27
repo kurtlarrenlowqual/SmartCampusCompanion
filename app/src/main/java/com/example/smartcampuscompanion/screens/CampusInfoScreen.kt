@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -158,8 +159,12 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
 
                     DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
                         scope.launch { drawerState.close() }
-                        navController.popBackStack()
+                        navController.navigate("dashboard") {
+                            popUpTo("dashboard") { inclusive = false }
+                            launchSingleTop = true
+                        }
                     }
+
                     DrawerMenuItem("Campus Information", Icons.Default.Info, isSelected = true) {
                         scope.launch { drawerState.close() }
                     }
@@ -171,7 +176,7 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
                         scope.launch { drawerState.close() }
                         navController.navigate("announcements")
                     }
-
+                    DrawerMenuItem("Settings", Icons.Default.Settings) { scope.launch { drawerState.close() }; navController.navigate("settings") }
                     Spacer(Modifier.weight(1f))
                     HorizontalDivider(Modifier.padding(horizontal = 24.dp))
 
