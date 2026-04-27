@@ -109,4 +109,11 @@ object FirestoreRepository {
                 }
             awaitClose { listener.remove() }
         }
+
+
+    data class DepartmentInfo(
+        val name: String,
+        val email: String,
+        val facebookUrl: String
+    )
 }
