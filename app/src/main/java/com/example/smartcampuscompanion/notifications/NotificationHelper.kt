@@ -14,7 +14,7 @@ import com.example.smartcampuscompanion.SmartCampusApp
 
 object NotificationHelper {
 
-    fun sendWelcomeBack(context: Context, username: String) {
+    fun sendWelcome(context: Context, username: String) {
         send(
             context,
             channel = SmartCampusApp.CHANNEL_GENERAL,

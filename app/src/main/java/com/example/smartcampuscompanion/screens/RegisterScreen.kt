@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.smartcampuscompanion.data.repository.FirestoreRepository
@@ -20,10 +21,10 @@ import kotlinx.coroutines.launch
 fun RegisterScreen(navController: NavController, context: Context) {
     SmartCampusCompanionTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-
-            var username    by remember { mutableStateOf("") }
-            var password    by remember { mutableStateOf("") }
             var displayName by remember { mutableStateOf("") }
+            var username    by remember { mutableStateOf("") }
+            var email       by remember { mutableStateOf("") }
+            var password    by remember { mutableStateOf("") }
             var isLoading   by remember { mutableStateOf(false) }
             var errorMsg    by remember { mutableStateOf<String?>(null) }
             var success     by remember { mutableStateOf(false) }
@@ -46,33 +47,65 @@ fun RegisterScreen(navController: NavController, context: Context) {
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(6.dp)
                 ) {
-                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Create Student Account", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Column(modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+
+                        Text("Create Student Account",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
-                        Text("Register with your campus credentials", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Register with your campus credentials",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(24.dp))
 
-                        OutlinedTextField(value = displayName, onValueChange = { displayName = it; errorMsg = null },
-                            label = { Text("Display Name") }, modifier = Modifier.fillMaxWidth(),
+                        OutlinedTextField(
+                            value = displayName,
+                            onValueChange = { displayName = it; errorMsg = null },
+                            label = { Text("Display Name") },
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp), singleLine = true)
                         Spacer(Modifier.height(12.dp))
-                        OutlinedTextField(value = username, onValueChange = { username = it; errorMsg = null },
-                            label = { Text("Username") }, modifier = Modifier.fillMaxWidth(),
+
+                        OutlinedTextField(
+                            value = username,
+                            onValueChange = { username = it; errorMsg = null },
+                            label = { Text("Username") },
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp), singleLine = true)
                         Spacer(Modifier.height(12.dp))
-                        OutlinedTextField(value = password, onValueChange = { password = it; errorMsg = null },
-                            label = { Text("Password") }, modifier = Modifier.fillMaxWidth(),
+
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { email = it; errorMsg = null },
+                            label = { Text("Email") },
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp), singleLine = true,
-                            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                keyboardType = androidx.compose.ui.text.input.KeyboardType.Email
+                            ))
+                        Spacer(Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it; errorMsg = null },
+                            label = { Text("Password") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp), singleLine = true,
+                            visualTransformation = PasswordVisualTransformation())
 
                         errorMsg?.let {
                             Spacer(Modifier.height(8.dp))
-                            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                            Text(it, color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.labelSmall)
                         }
 
                         if (success) {
                             Spacer(Modifier.height(16.dp))
-                            Text("Account created! You can now log in.", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                            Text("Account created! You can now log in.",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelMedium)
                         }
 
                         Spacer(Modifier.height(20.dp))
@@ -82,16 +115,25 @@ fun RegisterScreen(navController: NavController, context: Context) {
                         } else {
                             Button(
                                 onClick = {
-                                    if (username.isBlank() || password.isBlank() || displayName.isBlank()) {
-                                        errorMsg = "All fields are required."; return@Button
-                                    }
-                                    if (password.length < 4) {
-                                        errorMsg = "Password must be at least 4 characters."; return@Button
+                                    when {
+                                        displayName.isBlank() || username.isBlank() ||
+                                                email.isBlank() || password.isBlank() ->
+                                        { errorMsg = "All fields are required."; return@Button }
+                                        !email.contains("@") ->
+                                        { errorMsg = "Enter a valid email."; return@Button }
+                                        password.length < 6 ->
+                                        { errorMsg = "Password must be at least 6 characters."; return@Button }
                                     }
                                     isLoading = true
                                     scope.launch {
                                         try {
-                                            FirestoreRepository.register(username.trim(), password.trim(), "student", displayName.trim())
+                                            FirestoreRepository.register(
+                                                username  = username.trim(),
+                                                password  = password.trim(),
+                                                role      = "student",
+                                                displayName = displayName.trim(),
+                                                email     = email.trim()
+                                            )
                                             isLoading = false
                                             success = true
                                         } catch (e: Exception) {
@@ -102,10 +144,14 @@ fun RegisterScreen(navController: NavController, context: Context) {
                                 },
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
                                 shape = RoundedCornerShape(16.dp)
-                            ) { Text("Register", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold) }
+                            ) {
+                                Text("Register", style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold)
+                            }
                             Spacer(Modifier.height(12.dp))
                             TextButton(onClick = { navController.popBackStack() }) {
-                                Text("Back to Login", style = MaterialTheme.typography.labelSmall)
+                                Text("Back to Login",
+                                    style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
