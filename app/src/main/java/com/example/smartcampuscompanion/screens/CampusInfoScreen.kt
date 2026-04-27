@@ -158,8 +158,12 @@ fun CampusInfoScreen(navController: NavController, context: Context) {
 
                     DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
                         scope.launch { drawerState.close() }
-                        navController.popBackStack()
+                        navController.navigate("dashboard") {
+                            popUpTo("dashboard") { inclusive = false }
+                            launchSingleTop = true
+                        }
                     }
+
                     DrawerMenuItem("Campus Information", Icons.Default.Info, isSelected = true) {
                         scope.launch { drawerState.close() }
                     }
