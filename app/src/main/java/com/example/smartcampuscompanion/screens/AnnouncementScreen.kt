@@ -36,6 +36,7 @@ import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
 import com.example.smartcampuscompanion.util.SessionManager
 import com.example.smartcampuscompanion.viewmodel.AnnouncementViewModel
 import com.example.smartcampuscompanion.viewmodel.AnnouncementViewModelFactory
+import com.example.smartcampuscompanion.data.repository.FirestoreRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,6 +49,14 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
         val db = remember { DbProvider.get(appContext) }
         val repo = remember { AnnouncementRepository(db.announcementDao()) }
         val vm: AnnouncementViewModel = viewModel(factory = AnnouncementViewModelFactory(repo))
+
+        // Use Firestore real-time flow instead of Room
+        val firestoreItems by FirestoreRepository.observeAnnouncements()
+            .collectAsState(initial = emptyList())
+
+// Map FirestoreAnnouncement -> display data (no DB needed for display)
+        var isRefreshing by remember { mutableStateOf(false) }
+
 
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -117,9 +126,10 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
                 topBar = {
                     CenterAlignedTopAppBar(
                         title = { Text("Updates", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) },
-                        navigationIcon = {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.AutoMirrored.Filled.MenuOpen, contentDescription = "Menu")
+                        navigationIcon = { IconButton(onClick = { scope.launch { drawerState.open() } }) { Icon(Icons.AutoMirrored.Filled.MenuOpen, "Menu") } },
+                        actions = {
+                            IconButton(onClick = { isRefreshing = true; scope.launch { kotlinx.coroutines.delay(500); isRefreshing = false } }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                             }
                         }
                     )
