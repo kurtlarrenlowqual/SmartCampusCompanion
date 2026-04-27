@@ -37,6 +37,7 @@ import com.example.smartcampuscompanion.ui.theme.SmartCampusCompanionTheme
 import com.example.smartcampuscompanion.viewmodel.TaskViewModel
 import com.example.smartcampuscompanion.viewmodel.TaskViewModelFactory
 import com.example.smartcampuscompanion.util.SessionManager
+import com.example.smartcampuscompanion.notifications.TaskAlarmScheduler
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -207,7 +208,12 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                                         editingTask = task
                                         showAddDialog = true
                                     },
-                                    onDelete = { vm.deleteTask(task) }
+                                    onDelete = {
+                                        val alarmId = (task.dueAtMillis % Int.MAX_VALUE).toInt()
+                                        TaskAlarmScheduler.cancel(context, alarmId, task.title)
+                                        vm.deleteTask(task)
+                                    }
+
                                 )
                             }
                         }
@@ -224,17 +230,20 @@ fun TaskManagerScreen(navController: NavController, context: Context) {
                         val existing = editingTask
                         if (existing == null) {
                             vm.addTask(title, details, dueMillis)
+                            // Schedule notification
+                            val alarmId = (dueMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.schedule(context, alarmId, title, dueMillis)
                         } else {
-                            vm.updateTask(
-                                existing.copy(
-                                    title = title.trim(),
-                                    details = details.trim(),
-                                    dueAtMillis = dueMillis
-                                )
-                            )
+                            // Cancel old alarm, schedule new one
+                            val oldAlarmId = (existing.dueAtMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.cancel(context, oldAlarmId, existing.title)
+                            vm.updateTask(existing.copy(title = title.trim(), details = details.trim(), dueAtMillis = dueMillis))
+                            val newAlarmId = (dueMillis % Int.MAX_VALUE).toInt()
+                            TaskAlarmScheduler.schedule(context, newAlarmId, title, dueMillis)
                         }
                         showAddDialog = false
                     }
+
                 )
             }
         }
