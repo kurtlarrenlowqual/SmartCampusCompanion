@@ -89,7 +89,14 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) { scope.launch { drawerState.close() }; navController.popBackStack() }
+                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("dashboard") {
+                            popUpTo("dashboard") { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+
                     DrawerMenuItem("Campus Information", Icons.Default.Info) { scope.launch { drawerState.close() }; navController.navigate("campus") }
                     DrawerMenuItem("Task Manager", Icons.AutoMirrored.Filled.Assignment) { scope.launch { drawerState.close() }; navController.navigate("tasks") }
                     DrawerMenuItem("Announcements", Icons.Default.Campaign, isSelected = true) { scope.launch { drawerState.close() } }
