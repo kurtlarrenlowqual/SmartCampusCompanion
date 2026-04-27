@@ -77,7 +77,7 @@ fun SettingsScreen(navController: NavController, context: Context) {
                     }
 
                     Spacer(Modifier.weight(1f))
-                    Text("v2.0-final", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    Text("Beta version", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
                 }
             }
         }

@@ -68,58 +68,7 @@ fun AnnouncementsScreen(navController: NavController, context: Context) {
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
-                ModalDrawerSheet(
-                    drawerContainerColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.width(310.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.tertiary
-                                    )
-                                )
-                            )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(24.dp)
-                        ) {
-                            Spacer(Modifier.height(16.dp))
-                            Text("Smart Campus", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                            Text("COMPANION APP", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.7f))
-                        }
-                    }
 
-                    Spacer(Modifier.height(16.dp))
-
-                    DrawerMenuItem("Dashboard", Icons.Default.Dashboard) {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("dashboard") {
-                            popUpTo("dashboard") { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    }
-
-                    DrawerMenuItem("Campus Information", Icons.Default.Info) { scope.launch { drawerState.close() }; navController.navigate("campus") }
-                    DrawerMenuItem("Task Manager", Icons.AutoMirrored.Filled.Assignment) { scope.launch { drawerState.close() }; navController.navigate("tasks") }
-                    DrawerMenuItem("Announcements", Icons.Default.Campaign, isSelected = true) { scope.launch { drawerState.close() } }
-
-                    Spacer(Modifier.weight(1f))
-                    HorizontalDivider(Modifier.padding(horizontal = 24.dp))
-
-                    DrawerMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
-                        scope.launch { drawerState.close() }
-                        SessionManager.logout(context)
-                        navController.navigate("login") { popUpTo("dashboard") { inclusive = true } }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                }
             }
         ) {
             Scaffold(
